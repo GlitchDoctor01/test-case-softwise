@@ -1,0 +1,20 @@
+version: '3.6'
+services:
+  proxy:
+    image: nginx:latest
+    volumes:
+      - "./nginx-conf:/etc/nginx/conf.d"
+    ports:
+      - 80:80
+  
+  http-echo-01:
+    container_name: "http-echo-01"
+    build: http-echo/
+    links:
+      - proxy
+      
+  http-echo-02:
+    container_name: "http-echo-02"
+    build: http-echo/
+    links:
+      - proxy

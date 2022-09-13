@@ -1,0 +1,27 @@
+---
+- name: "Zero Downtime http-echo deployment"
+  hosts: localhost
+  vars:
+    - repo: "/mnt/c/test-casses/softwise/docker"
+  tasks:
+    - name: build and start first instance
+      become: True
+      shell:
+        cmd: docker compose up http-echo-01 --build -d
+        chdir: "{{ repo }}"
+    
+    - name: wait instance to properly start
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Get container status
+      docker_container_info:
+        name: http-echo-01
+      register: status
+
+    - name: build and start second instance if first container is running
+      become: True
+      shell:
+        cmd: docker compose up http-echo-02 --build -d
+        chdir: "{{ repo }}"
+      when: status.container['State']['Status'] == "running"
